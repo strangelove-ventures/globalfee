@@ -7,16 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
-	wasmd "github.com/CosmWasm/wasmd/app"
-	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"github.com/spf13/cast"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/gogoproto/proto"
@@ -134,6 +128,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+
+	globalfee "github.com/reecepbcups/globalfee/x/globalfee"
+	globalfeekeeper "github.com/reecepbcups/globalfee/x/globalfee/keeper"
+	globalfeetypes "github.com/reecepbcups/globalfee/x/globalfee/types"
 )
 
 // We pull these out so we can set them with LDFLAGS in the Makefile
@@ -184,7 +185,7 @@ var maccPerms = map[string][]string{
 	ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 	ibcfeetypes.ModuleName:      nil,
 	icatypes.ModuleName:         nil,
-	wasmtypes.ModuleName:        {authtypes.Burner},
+	globalfee.ModuleName:        nil, // TODO: not sure if this is required
 }
 
 var (
@@ -230,18 +231,18 @@ type ChainApp struct {
 	ICAControllerKeeper icacontrollerkeeper.Keeper
 	ICAHostKeeper       icahostkeeper.Keeper
 	TransferKeeper      ibctransferkeeper.Keeper
-	WasmKeeper          wasmkeeper.Keeper
 
 	ScopedIBCKeeper           capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
 	ScopedICAControllerKeeper capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper      capabilitykeeper.ScopedKeeper
 	ScopedIBCFeeKeeper        capabilitykeeper.ScopedKeeper
-	ScopedWasmKeeper          capabilitykeeper.ScopedKeeper
 
 	// the module manager
 	ModuleManager      *module.Manager
 	BasicModuleManager module.BasicManager
+
+	GlobalFeeKeeper globalfeekeeper.Keeper
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -257,7 +258,6 @@ func NewApp(
 	traceStore io.Writer,
 	loadLatest bool,
 	appOpts servertypes.AppOptions,
-	wasmOpts []wasmkeeper.Option,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *ChainApp {
 	interfaceRegistry, err := types.NewInterfaceRegistryWithOptions(types.InterfaceRegistryOptions{
@@ -295,8 +295,9 @@ func NewApp(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		// non sdk store keys
 		capabilitytypes.StoreKey, ibcexported.StoreKey, ibctransfertypes.StoreKey, ibcfeetypes.StoreKey,
-		wasmtypes.StoreKey, icahosttypes.StoreKey,
+		icahosttypes.StoreKey,
 		icacontrollertypes.StoreKey,
+		globalfeetypes.StoreKey,
 	)
 
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -347,7 +348,6 @@ func NewApp(
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 	scopedICAControllerKeeper := app.CapabilityKeeper.ScopeToModule(icacontrollertypes.SubModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
-	scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
 	app.CapabilityKeeper.Seal()
 
 	// add keepers
@@ -529,6 +529,12 @@ func NewApp(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
+	app.GlobalFeeKeeper = globalfeekeeper.NewKeeper(
+		appCodec,
+		app.keys[globalfeetypes.StoreKey],
+		govModAddress,
+	)
+
 	// IBC Fee Module keeper
 	app.IBCFeeKeeper = ibcfeekeeper.NewKeeper(
 		appCodec, keys[ibcfeetypes.StoreKey],
@@ -575,36 +581,6 @@ func NewApp(
 		govModAddress,
 	)
 
-	wasmDir := filepath.Join(homePath, "wasm")
-	wasmConfig, err := wasm.ReadWasmConfig(appOpts)
-	if err != nil {
-		panic(fmt.Sprintf("error while reading wasm config: %s", err))
-	}
-
-	// The last arguments can contain custom message handlers, and custom query handlers,
-	// if we want to allow any custom callbacks
-	// availableCapabilities := strings.Join(AllCapabilities(), ",")
-	app.WasmKeeper = wasmkeeper.NewKeeper(
-		appCodec,
-		runtime.NewKVStoreService(keys[wasmtypes.StoreKey]),
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.StakingKeeper,
-		distrkeeper.NewQuerier(app.DistrKeeper),
-		app.IBCFeeKeeper, // ISC4 Wrapper: fee IBC middleware
-		app.IBCKeeper.ChannelKeeper,
-		app.IBCKeeper.PortKeeper,
-		scopedWasmKeeper,
-		app.TransferKeeper,
-		app.MsgServiceRouter(),
-		app.GRPCQueryRouter(),
-		wasmDir,
-		wasmConfig,
-		strings.Join(wasmd.AllCapabilities(), ","),
-		govModAddress,
-		wasmOpts...,
-	)
-
 	// Set legacy router for backwards compatibility with gov v1beta1
 	app.GovKeeper.SetLegacyRouter(govRouter)
 
@@ -629,15 +605,9 @@ func NewApp(
 	icaHostStack = icahost.NewIBCModule(app.ICAHostKeeper)
 	icaHostStack = ibcfee.NewIBCMiddleware(icaHostStack, app.IBCFeeKeeper)
 
-	// Create fee enabled wasm ibc Stack
-	var wasmStack porttypes.IBCModule
-	wasmStack = wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCFeeKeeper)
-	wasmStack = ibcfee.NewIBCMiddleware(wasmStack, app.IBCFeeKeeper)
-
 	// Create static IBC router, add app routes, then set and seal it
 	ibcRouter := porttypes.NewRouter().
 		AddRoute(ibctransfertypes.ModuleName, transferStack).
-		AddRoute(wasmtypes.ModuleName, wasmStack).
 		AddRoute(icacontrollertypes.SubModuleName, icaControllerStack).
 		AddRoute(icahosttypes.SubModuleName, icaHostStack)
 	app.IBCKeeper.SetRouter(ibcRouter)
@@ -647,6 +617,8 @@ func NewApp(
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
 	// we prefer to be more strict in what arguments the modules expect.
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+
+	bondDenom := app.GetChainBondDenom()
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
@@ -676,12 +648,12 @@ func NewApp(
 		circuit.NewAppModule(appCodec, app.CircuitKeeper),
 		// non sdk modules
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper, false),
-		wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
 		ibc.NewAppModule(app.IBCKeeper),
 		transfer.NewAppModule(app.TransferKeeper),
 		ibcfee.NewAppModule(app.IBCFeeKeeper),
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
 		ibctm.NewAppModule(),
+		globalfee.NewAppModule(appCodec, app.GlobalFeeKeeper, bondDenom),
 		// sdk
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
@@ -727,7 +699,6 @@ func NewApp(
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
-		wasmtypes.ModuleName,
 	)
 
 	app.ModuleManager.SetOrderEndBlockers(
@@ -743,7 +714,6 @@ func NewApp(
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
-		wasmtypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -767,8 +737,7 @@ func NewApp(
 		ibcexported.ModuleName,
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
-		// wasm after ibc transfer
-		wasmtypes.ModuleName,
+		globalfee.ModuleName,
 	}
 	app.ModuleManager.SetOrderInitGenesis(genesisModuleOrder...)
 	app.ModuleManager.SetOrderExportGenesis(genesisModuleOrder...)
@@ -819,24 +788,23 @@ func NewApp(
 	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.setAnteHandler(txConfig, wasmConfig, keys[wasmtypes.StoreKey])
+	app.setAnteHandler(txConfig)
 	app.SetProcessProposal(app.ProcessProposalHandler)
 
 	// must be before Loading version
 	// requires the snapshot store to be created and registered as a BaseAppOption
 	// see cmd/wasmd/root.go: 206 - 214 approx
-	if manager := app.SnapshotManager(); manager != nil {
-		err := manager.RegisterExtensions(
-			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
-		)
-		if err != nil {
-			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
-		}
-	}
+	// if manager := app.SnapshotManager(); manager != nil {
+	// 	err := manager.RegisterExtensions(
+	// 		wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+	// 	)
+	// 	if err != nil {
+	// 		panic(fmt.Errorf("failed to register snapshot extension: %s", err))
+	// 	}
+	// }
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
-	app.ScopedWasmKeeper = scopedWasmKeeper
 	app.ScopedICAHostKeeper = scopedICAHostKeeper
 	app.ScopedICAControllerKeeper = scopedICAControllerKeeper
 
@@ -877,18 +845,12 @@ func NewApp(
 		if err := app.LoadLatestVersion(); err != nil {
 			panic(fmt.Errorf("error loading last version: %w", err))
 		}
-		ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
-
-		// Initialize pinned codes in wasmvm as they are not persisted there
-		if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
-			panic(fmt.Sprintf("failed initialize pinned codes %s", err))
-		}
 	}
 
 	return app
 }
 
-func (app *ChainApp) setAnteHandler(txConfig client.TxConfig, wasmConfig wasmtypes.WasmConfig, txCounterStoreKey *storetypes.KVStoreKey) {
+func (app *ChainApp) setAnteHandler(txConfig client.TxConfig) {
 	anteHandler, err := NewAnteHandler(
 		HandlerOptions{
 			HandlerOptions: ante.HandlerOptions{
@@ -898,17 +860,34 @@ func (app *ChainApp) setAnteHandler(txConfig client.TxConfig, wasmConfig wasmtyp
 				FeegrantKeeper:  app.FeeGrantKeeper,
 				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			},
-			IBCKeeper:             app.IBCKeeper,
-			WasmConfig:            &wasmConfig,
-			WasmKeeper:            &app.WasmKeeper,
-			TXCounterStoreService: runtime.NewKVStoreService(txCounterStoreKey),
-			CircuitKeeper:         &app.CircuitKeeper,
+			IBCKeeper:     app.IBCKeeper,
+			CircuitKeeper: &app.CircuitKeeper,
+
+			GlobalFeeKeeper:      app.GlobalFeeKeeper,
+			BypassMinFeeMsgTypes: GetDefaultBypassFeeMessages(),
 		},
 	)
 	if err != nil {
 		panic(fmt.Errorf("failed to create AnteHandler: %s", err))
 	}
 	app.SetAnteHandler(anteHandler)
+}
+
+func GetDefaultBypassFeeMessages() []string {
+	return []string{
+		// IBC
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgRecvPacket{}),
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgAcknowledgement{}),
+		sdk.MsgTypeURL(&ibcclienttypes.MsgCreateClient{}),
+		sdk.MsgTypeURL(&ibcclienttypes.MsgUpdateClient{}),
+		sdk.MsgTypeURL(&ibcclienttypes.MsgUpgradeClient{}),
+		sdk.MsgTypeURL(&ibctransfertypes.MsgTransfer{}),
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgTimeout{}),
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgTimeoutOnClose{}),
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgChannelOpenTry{}),
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgChannelOpenConfirm{}),
+		sdk.MsgTypeURL(&ibcchanneltypes.MsgChannelOpenAck{}),
+	}
 }
 
 func (app *ChainApp) setPostHandler() {
@@ -1148,6 +1127,14 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
-	paramsKeeper.Subspace(wasmtypes.ModuleName)
+	paramsKeeper.Subspace(globalfee.ModuleName)
 	return paramsKeeper
+}
+
+func (app *ChainApp) GetChainBondDenom() string {
+	d := "stake"
+	// if strings.HasPrefix(app.ChainID(), "local-") {
+	// 	d = "ustake"
+	// }
+	return d
 }

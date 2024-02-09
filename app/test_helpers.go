@@ -8,8 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	apphelpers "github.com/reecepbcups/globalfee/app/helpers"
 	appparams "github.com/reecepbcups/globalfee/app/params"
 	"github.com/stretchr/testify/require"
@@ -162,7 +160,7 @@ func SetupWithGenesisValSet(t *testing.T, valSet *tmtypes.ValidatorSet, genAccs 
 }
 
 //nolint:all
-func setup(t *testing.T, withGenesis bool, opts ...wasmkeeper.Option) (*ChainApp, GenesisState) {
+func setup(t *testing.T, withGenesis bool) (*ChainApp, GenesisState) {
 	db := dbm.NewMemDB()
 	nodeHome := t.TempDir()
 	snapshotDir := filepath.Join(nodeHome, "data", "snapshots")
@@ -183,7 +181,6 @@ func setup(t *testing.T, withGenesis bool, opts ...wasmkeeper.Option) (*ChainApp
 		nil,
 		true,
 		EmptyAppOptions{},
-		opts,
 		bam.SetChainID(SimAppChainID),
 		bam.SetSnapshot(snapshotStore, snapshottypes.SnapshotOptions{KeepRecent: 2}),
 	)
@@ -210,7 +207,6 @@ func setup(t *testing.T, withGenesis bool, opts ...wasmkeeper.Option) (*ChainApp
 	app.IBCKeeper.ConnectionKeeper.SetNextConnectionSequence(ctx, 0)
 	app.IBCKeeper.ConnectionKeeper.SetParams(ctx, connectiontypes.DefaultParams())
 	app.IBCKeeper.ChannelKeeper.SetNextChannelSequence(ctx, 0)
-	app.WasmKeeper.SetParams(ctx, wasm.DefaultParams())
 	app.ICAControllerKeeper.SetParams(ctx, icatypes.DefaultParams())
 	app.ICAHostKeeper.SetParams(ctx, icahosttypes.DefaultParams())
 	app.GovKeeper.Constitution.Set(ctx, "")
@@ -312,23 +308,6 @@ func RandomAccountAddress() sdk.AccAddress {
 	return addr
 }
 
-func ExecuteRawCustom(t *testing.T, ctx sdk.Context, app *ChainApp, contract sdk.AccAddress, sender sdk.AccAddress, msg json.RawMessage, funds sdk.Coin) error {
-	t.Helper()
-	oracleBz, err := json.Marshal(msg)
-	require.NoError(t, err)
-	// no funds sent if amount is 0
-	var coins sdk.Coins
-	if !funds.Amount.IsNil() {
-		coins = sdk.Coins{funds}
-	}
-
-	contractKeeper := wasmkeeper.NewDefaultPermissionKeeper(app.WasmKeeper)
-	_, err = contractKeeper.Execute(ctx, contract, sender, oracleBz, coins)
-	return err
-}
-
-var emptyWasmOptions []wasmkeeper.Option
-
 // NewTestNetworkFixture returns a new app AppConstructor for network simulation tests
 func NewTestNetworkFixture() network.TestFixture {
 	dir, err := os.MkdirTemp("", "simapp")
@@ -337,12 +316,11 @@ func NewTestNetworkFixture() network.TestFixture {
 	}
 	defer os.RemoveAll(dir)
 
-	app := NewApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(dir), emptyWasmOptions)
+	app := NewApp(log.NewNopLogger(), dbm.NewMemDB(), nil, true, simtestutil.NewAppOptionsWithFlagHome(dir))
 	appCtr := func(val network.ValidatorI) servertypes.Application {
 		return NewApp(
 			val.GetCtx().Logger, dbm.NewMemDB(), nil, true,
 			simtestutil.NewAppOptionsWithFlagHome(val.GetCtx().Config.RootDir),
-			emptyWasmOptions,
 			bam.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 			bam.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
 			bam.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),

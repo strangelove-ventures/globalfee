@@ -98,7 +98,7 @@ func TestInitExportGenesis(t *testing.T) {
 	for name, spec := range specs {
 		t.Run(name, func(t *testing.T) {
 			ctx, encCfg, keeper := setupTestStore(t)
-			m := NewAppModule(encCfg.Codec, keeper, "stake")
+			m := NewAppModule(encCfg.Codec, keeper)
 			m.InitGenesis(ctx, encCfg.Codec, []byte(spec.src))
 			gotJSON := m.ExportGenesis(ctx, encCfg.Codec)
 			var got types.GenesisState

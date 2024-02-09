@@ -110,12 +110,10 @@ func (AppModule) IsOnePerModuleType() {
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,
-	debondDenom string,
 ) *AppModule {
 	return &AppModule{
 		AppModuleBasic: AppModuleBasic{cdc: cdc},
 		keeper:         keeper,
-		bondDenom:      debondDenom,
 	}
 }
 

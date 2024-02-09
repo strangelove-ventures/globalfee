@@ -46,9 +46,8 @@ empty = $(whitespace) $(whitespace)
 comma := ,
 build_tags_comma_sep := $(subst $(empty),$(comma),$(build_tags))
 
-# -X github.com/reecepbcups/globalfee/app.Bech32Prefix=tokenfactory
-ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=tokenfactory \
-		  -X github.com/cosmos/cosmos-sdk/version.AppName=tokend \
+ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=globalfee \
+		  -X github.com/cosmos/cosmos-sdk/version.AppName=globald \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)"
@@ -72,8 +71,8 @@ all: install
 install:
 	@echo "--> ensure dependencies have not been modified"
 	@go mod verify
-	@echo "--> installing tokend"
-	@go install $(BUILD_FLAGS) -mod=readonly ./cmd/tokend
+	@echo "--> installing globald"
+	@go install $(BUILD_FLAGS) -mod=readonly ./cmd/globald
 
 init:
 	./scripts/init.sh
@@ -83,11 +82,11 @@ ifeq ($(OS),Windows_NT)
 	$(error demo server not supported)
 	exit 1
 else
-	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/tokend ./cmd/tokend
+	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/globalfee ./cmd/globald
 endif
 
 build-vendored:
-	go build -mod=vendor $(BUILD_FLAGS) -o $(BUILD_DIR)/tokend ./cmd/tokend
+	go build -mod=vendor $(BUILD_FLAGS) -o $(BUILD_DIR)/globalfee ./cmd/globald
 
 .PHONY: all build build-linux install init lint build-vendored
 
@@ -95,11 +94,11 @@ build-vendored:
 ###                          INTERCHAINTEST (ictest)                        ###
 ###############################################################################
 
-ictest-tokenfactory:
-	cd interchaintest && go test -race -v -run TestTokenFactory . -count=1
+ictest-globalfee:
+	cd interchaintest && go test -race -v -run TestGlobalFee . -count=1
 
 
-.PHONY: ictest-ibc ictest-tokenfactory
+.PHONY: ictest-globalfee
 
 ###############################################################################
 ###                                Build Image                              ###
@@ -113,7 +112,7 @@ local-image:
 ifeq (,$(shell which heighliner))
 	echo 'heighliner' binary not found. Consider running `make get-heighliner`
 else
-	heighliner build -c tokenfactory --local -f ./chains.yaml
+	heighliner build -c globalfee --local -f ./chains.yaml
 endif
 
 .PHONY: get-heighliner local-image

@@ -139,10 +139,10 @@ import (
 
 // We pull these out so we can set them with LDFLAGS in the Makefile
 var (
-	AppName         = "tokenfactory"
+	AppName         = "globalfee"
 	Bech32Prefix    = "cosmos"
-	DefaultNodeHome = ".tokend"
-	BinaryName      = "tokend"
+	DefaultNodeHome = ".globalfee"
+	BinaryName      = "globalfee"
 )
 
 func init() {

@@ -19,17 +19,17 @@ RUN set -eux; \
 COPY . /code
 
 # force it to use static lib (from above) not standard libgo_cosmwasm.so file
-# then log output of file /code/bin/tokend
+# then log output of file /code/bin/globalfee
 # then ensure static linking
 RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make build \
-  && file /code/build/tokend \
+  && file /code/build/globalfee \
   && echo "Ensuring binary is statically linked ..." \
-  && (file /code/build/tokend | grep "statically linked")
+  && (file /code/build/globalfee | grep "statically linked")
 
 # --------------------------------------------------------
 FROM alpine:3.16
 
-COPY --from=go-builder /code/build/tokend /usr/bin/tokend
+COPY --from=go-builder /code/build/globalfee /usr/bin/globalfee
 
 # Install dependencies used for Starship
 RUN apk add --no-cache curl make bash jq sed
@@ -39,4 +39,4 @@ WORKDIR /opt
 # rest server, tendermint p2p, tendermint rpc
 EXPOSE 1317 26656 26657
 
-CMD ["/usr/bin/tokend", "version"]
+CMD ["/usr/bin/globalfee", "version"]

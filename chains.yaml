@@ -1,11 +1,11 @@
 # This file is used to create docker images using the heighliner binary.
 # see: https://github.com/strangelove-ventures/heighliner
 
-- name: tokenfactory
+- name: globalfee
   dockerfile: cosmos
   build-target: make install
   binaries:
-    - /go/bin/tokend
+    - /go/bin/globalfee
   build-env:
     - LEDGER_ENABLED=false
     - BUILD_TAGS=muslc

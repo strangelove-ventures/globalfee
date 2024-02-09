@@ -12,8 +12,8 @@ permissions:
 
 env:
   GO_VERSION: 1.21.0
-  TAR_PATH: /tmp/tokenfactory-docker-image.tar
-  IMAGE_NAME: tokenfactory-docker-image
+  TAR_PATH: /tmp/globalfee-docker-image.tar
+  IMAGE_NAME: globalfee-docker-image
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,7 +38,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          tags: tokenfactory:local
+          tags: globalfee:local
           outputs: type=docker,dest=${{ env.TAR_PATH }}
 
       - name: Upload artifact
@@ -54,7 +54,7 @@ jobs:
       matrix:
         # names of `make` commands to run tests
         test:
-          - "ictest-tokenfactory"
+          - "ictest-globalfee"
       fail-fast: false
 
     steps:

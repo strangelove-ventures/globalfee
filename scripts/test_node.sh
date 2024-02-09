@@ -2,10 +2,10 @@
 # Run this script to quickly install, setup, and run the current chain without docker.
 #
 # Example:
-# CHAIN_ID="local-1" HOME_DIR="~/.tokenfactory" TIMEOUT_COMMIT="500ms" CLEAN=true sh scripts/test_node.sh
-# CHAIN_ID="local-2" HOME_DIR="~/.tokenfactory2" CLEAN=true RPC=36657 REST=2317 PROFF=6061 P2P=36656 GRPC=8090 GRPC_WEB=8091 ROSETTA=8081 TIMEOUT_COMMIT="500ms" sh scripts/test_node.sh
+# CHAIN_ID="local-1" HOME_DIR="~/.simapp" TIMEOUT_COMMIT="500ms" CLEAN=true sh scripts/test_node.sh
+# CHAIN_ID="local-2" HOME_DIR="~/.simapp2" CLEAN=true RPC=36657 REST=2317 PROFF=6061 P2P=36656 GRPC=8090 GRPC_WEB=8091 ROSETTA=8081 TIMEOUT_COMMIT="500ms" sh scripts/test_node.sh
 #
-# To use unoptomized wasm files up to ~5mb, add: MAX_WASM_SIZE=5000000
+# globald q globalfee minimum-gas-prices
 
 export KEY="user1"
 export KEY2="user2"
@@ -14,8 +14,8 @@ export CHAIN_ID=${CHAIN_ID:-"local-1"}
 export MONIKER="localval"
 export KEYALGO="secp256k1"
 export KEYRING=${KEYRING:-"test"}
-export HOME_DIR=$(eval echo "${HOME_DIR:-"~/.tokenfactory"}")
-export BINARY=${BINARY:-tokend}
+export HOME_DIR=$(eval echo "${HOME_DIR:-"~/.simapp"}")
+export BINARY=${BINARY:-globald}
 
 export CLEAN=${CLEAN:-"false"}
 export RPC=${RPC:-"26657"}
@@ -66,10 +66,7 @@ from_scratch () {
   update_test_genesis '.app_state["mint"]["params"]["mint_denom"]="token"'
 
   # Custom Modules
-
-  # TokenFactory
-  update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_fee"]=[]'
-  update_test_genesis '.app_state["tokenfactory"]["params"]["denom_creation_gas_consume"]=2000000'
+  update_test_genesis '.app_state["globalfee"]["params"]["minimum_gas_prices"]=[{"amount":"0.000100000000000000","denom":"token"}]'
 
   # Allocate genesis accounts
   BINARY genesis add-genesis-account $KEY 1000000ustake,10000000token,1000utest --keyring-backend $KEYRING
@@ -77,7 +74,7 @@ from_scratch () {
 
   # must have at least 1 full token to be valid to start.
   GenTxFlags="--commission-rate=0.0 --commission-max-rate=1.0 --commission-max-change-rate=0.1"
-  BINARY genesis gentx $KEY 1000000ustake --keyring-backend $KEYRING --chain-id $CHAIN_ID $GenTxFlags
+  BINARY genesis gentx $KEY 1000000token --keyring-backend $KEYRING --chain-id $CHAIN_ID $GenTxFlags
 
   # Collect genesis tx
   BINARY genesis collect-gentxs --home=$HOME_DIR

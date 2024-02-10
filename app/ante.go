@@ -29,7 +29,7 @@ type HandlerOptions struct {
 
 	GlobalFeeKeeper      globalfeekeeper.Keeper
 	BypassMinFeeMsgTypes []string
-	StakingKeeper        stakingkeeper.Keeper // TODO: save the bond denom instead
+	StakingKeeper        *stakingkeeper.Keeper // TODO: save the bond denom instead
 
 }
 

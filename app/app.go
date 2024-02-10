@@ -863,6 +863,7 @@ func (app *ChainApp) setAnteHandler(txConfig client.TxConfig) {
 
 			GlobalFeeKeeper:      app.GlobalFeeKeeper,
 			BypassMinFeeMsgTypes: GetDefaultBypassFeeMessages(),
+			StakingKeeper:        app.StakingKeeper,
 		},
 	)
 	if err != nil {

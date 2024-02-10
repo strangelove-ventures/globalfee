@@ -31,11 +31,11 @@ var _ sdk.AnteDecorator = FeeDecorator{}
 type FeeDecorator struct {
 	BypassMinFeeMsgTypes            []string
 	GlobalFeeKeeper                 globalfeekeeper.Keeper
-	StakingKeeper                   stakingkeeper.Keeper
+	StakingKeeper                   *stakingkeeper.Keeper
 	MaxTotalBypassMinFeeMsgGasUsage uint64
 }
 
-func NewFeeDecorator(bypassMsgTypes []string, gfk globalfeekeeper.Keeper, sk stakingkeeper.Keeper, maxTotalBypassMinFeeMsgGasUsage uint64) FeeDecorator {
+func NewFeeDecorator(bypassMsgTypes []string, gfk globalfeekeeper.Keeper, sk *stakingkeeper.Keeper, maxTotalBypassMinFeeMsgGasUsage uint64) FeeDecorator {
 	return FeeDecorator{
 		BypassMinFeeMsgTypes:            bypassMsgTypes,
 		GlobalFeeKeeper:                 gfk,

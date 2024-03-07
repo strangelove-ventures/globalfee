@@ -12,9 +12,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 
-	"github.com/reecepbcups/globalfee/x/globalfee"
-	v2 "github.com/reecepbcups/globalfee/x/globalfee/migrations/v2"
-	"github.com/reecepbcups/globalfee/x/globalfee/types"
+	"github.com/strangelove-ventures/globalfee/x/globalfee"
+	v2 "github.com/strangelove-ventures/globalfee/x/globalfee/migrations/v2"
+	"github.com/strangelove-ventures/globalfee/x/globalfee/types"
 )
 
 func TestMigrateMainnet(t *testing.T) {

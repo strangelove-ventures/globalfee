@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	apphelpers "github.com/reecepbcups/globalfee/app/helpers"
-	appparams "github.com/reecepbcups/globalfee/app/params"
+	apphelpers "github.com/strangelove-ventures/globalfee/app/helpers"
+	appparams "github.com/strangelove-ventures/globalfee/app/params"
 	"github.com/stretchr/testify/require"
 
 	abci "github.com/cometbft/cometbft/abci/types"

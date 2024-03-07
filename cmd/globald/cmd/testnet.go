@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/reecepbcups/globalfee/app"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"github.com/strangelove-ventures/globalfee/app"
 
 	cmtconfig "github.com/cometbft/cometbft/config"
 	cmttime "github.com/cometbft/cometbft/types/time"

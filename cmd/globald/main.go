@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/reecepbcups/globalfee/app"
-	"github.com/reecepbcups/globalfee/cmd/globald/cmd"
+	"github.com/strangelove-ventures/globalfee/app"
+	"github.com/strangelove-ventures/globalfee/cmd/globald/cmd"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 )

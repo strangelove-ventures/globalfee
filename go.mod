@@ -1,4 +1,4 @@
-module github.com/reecepbcups/globalfee
+module github.com/strangelove-ventures/globalfee
 
 go 1.21
 

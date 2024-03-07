@@ -3,8 +3,8 @@ package app
 import (
 	"fmt"
 
-	"github.com/reecepbcups/globalfee/app/upgrades"
-	"github.com/reecepbcups/globalfee/app/upgrades/noop"
+	"github.com/strangelove-ventures/globalfee/app/upgrades"
+	"github.com/strangelove-ventures/globalfee/app/upgrades/noop"
 
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 )

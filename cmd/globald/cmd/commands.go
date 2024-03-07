@@ -5,9 +5,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/reecepbcups/globalfee/app"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/strangelove-ventures/globalfee/app"
 
 	cmtcfg "github.com/cometbft/cometbft/config"
 

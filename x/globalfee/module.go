@@ -19,9 +19,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	"github.com/reecepbcups/globalfee/x/globalfee/client/cli"
-	"github.com/reecepbcups/globalfee/x/globalfee/keeper"
-	"github.com/reecepbcups/globalfee/x/globalfee/types"
+	"github.com/strangelove-ventures/globalfee/x/globalfee/client/cli"
+	"github.com/strangelove-ventures/globalfee/x/globalfee/keeper"
+	"github.com/strangelove-ventures/globalfee/x/globalfee/types"
 )
 
 var (

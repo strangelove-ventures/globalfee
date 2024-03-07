@@ -13,8 +13,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
-	globalfeeante "github.com/reecepbcups/globalfee/x/globalfee/ante"
-	globalfeekeeper "github.com/reecepbcups/globalfee/x/globalfee/keeper"
+	globalfeeante "github.com/strangelove-ventures/globalfee/x/globalfee/ante"
+	globalfeekeeper "github.com/strangelove-ventures/globalfee/x/globalfee/keeper"
 )
 
 const maxBypassMinFeeMsgGasUsage = 2_000_000

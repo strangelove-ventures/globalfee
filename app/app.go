@@ -132,9 +132,9 @@ import (
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibcchanneltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 
-	globalfee "github.com/reecepbcups/globalfee/x/globalfee"
-	globalfeekeeper "github.com/reecepbcups/globalfee/x/globalfee/keeper"
-	globalfeetypes "github.com/reecepbcups/globalfee/x/globalfee/types"
+	globalfee "github.com/strangelove-ventures/globalfee/x/globalfee"
+	globalfeekeeper "github.com/strangelove-ventures/globalfee/x/globalfee/keeper"
+	globalfeetypes "github.com/strangelove-ventures/globalfee/x/globalfee/types"
 )
 
 // We pull these out so we can set them with LDFLAGS in the Makefile

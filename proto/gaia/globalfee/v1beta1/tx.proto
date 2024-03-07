@@ -1,7 +1,7 @@
 syntax = "proto3";
 package gaia.globalfee.v1beta1;
 
-option go_package = "github.com/reecepbcups/globalfee/x/globalfee/types";
+option go_package = "github.com/strangelove-ventures/globalfee/x/globalfee/types";
 
 import "cosmos/msg/v1/msg.proto";
 import "gaia/globalfee/v1beta1/genesis.proto";

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/reecepbcups/globalfee/app"
-	"github.com/reecepbcups/globalfee/app/params"
 	"github.com/spf13/cobra"
+	"github.com/strangelove-ventures/globalfee/app"
+	"github.com/strangelove-ventures/globalfee/app/params"
 
 	dbm "github.com/cosmos/cosmos-db"
 

@@ -1,7 +1,7 @@
 package globalfee
 
 import (
-	"github.com/reecepbcups/globalfee/x/globalfee/types"
+	"github.com/strangelove-ventures/globalfee/x/globalfee/types"
 )
 
 const (

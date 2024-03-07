@@ -1,4 +1,4 @@
-module github.com/reecepbcups/globalfee/interchaintest
+module github.com/strangelove-ventures/globalfee/interchaintest
 
 go 1.21.1
 
@@ -8,13 +8,13 @@ replace (
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
-	github.com/reecepbcups/globalfee => ../
+	github.com/strangelove-ventures/globalfee => ../
 )
 
 require (
 	cosmossdk.io/math v1.2.0
 	github.com/cosmos/cosmos-sdk v0.50.3
-	github.com/reecepbcups/globalfee v0.0.0-00000000000000-000000000000
+	github.com/strangelove-ventures/globalfee v0.0.0-00000000000000-000000000000
 	github.com/strangelove-ventures/interchaintest/v8 v8.0.1-0.20240124225619-c55143141632
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0

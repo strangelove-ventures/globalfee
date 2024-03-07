@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/reecepbcups/globalfee/x/globalfee/types"
+	"github.com/strangelove-ventures/globalfee/x/globalfee/types"
 )
 
 // Keeper of the globalfee store

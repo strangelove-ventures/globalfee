@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/reecepbcups/globalfee/app"
-	appparams "github.com/reecepbcups/globalfee/app/params"
+	"github.com/strangelove-ventures/globalfee/app"
+	appparams "github.com/strangelove-ventures/globalfee/app/params"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"

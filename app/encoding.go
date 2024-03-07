@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"github.com/reecepbcups/globalfee/app/params"
+	"github.com/strangelove-ventures/globalfee/app/params"
 
 	dbm "github.com/cosmos/cosmos-db"
 

@@ -5,7 +5,6 @@
   dockerfile: cosmos
   build-target: make install
   binaries:
-    - /go/bin/globalfee
+    - /go/bin/globald
   build-env:
     - LEDGER_ENABLED=false
-    - BUILD_TAGS=muslc

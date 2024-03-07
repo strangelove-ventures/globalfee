@@ -89,8 +89,6 @@ func bankSendWithFees(t *testing.T, ctx context.Context, chain *cosmos.CosmosCha
 	stdout, _, err := chain.Exec(ctx, cmd, nil)
 	require.NoError(t, err)
 
-	t.Log(string(stdout))
-
 	if err := testutil.WaitForBlocks(ctx, 2, chain); err != nil {
 		t.Fatal(err)
 	}

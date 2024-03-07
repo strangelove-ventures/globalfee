@@ -52,7 +52,6 @@ require (
 )
 
 require (
-	// github.com/CosmWasm/wasmvm v1.5.2
 	cloud.google.com/go v0.110.10 // indirect
 	cloud.google.com/go/compute v1.23.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect

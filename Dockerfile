@@ -21,7 +21,7 @@ RUN set -eux; \
 COPY . /code
 
 # force it to use static lib (from above) not standard libgo_cosmwasm.so file
-# then log output of file /code/bin/globalfee
+# then log output of file /code/bin/globald
 # then ensure static linking
 RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make build \
   && file /code/build/globald \

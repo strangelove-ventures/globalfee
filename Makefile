@@ -82,11 +82,11 @@ ifeq ($(OS),Windows_NT)
 	$(error demo server not supported)
 	exit 1
 else
-	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/globalfee ./cmd/globald
+	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/globald ./cmd/globald
 endif
 
 build-vendored:
-	go build -mod=vendor $(BUILD_FLAGS) -o $(BUILD_DIR)/globalfee ./cmd/globald
+	go build -mod=vendor $(BUILD_FLAGS) -o $(BUILD_DIR)/globald ./cmd/globald
 
 .PHONY: all build build-linux install init lint build-vendored
 

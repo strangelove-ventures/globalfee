@@ -24,14 +24,14 @@ COPY . /code
 # then log output of file /code/bin/globalfee
 # then ensure static linking
 RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make build \
-  && file /code/build/globalfee \
+  && file /code/build/globald \
   && echo "Ensuring binary is statically linked ..." \
-  && (file /code/build/globalfee | grep "statically linked")
+  && (file /code/build/globald | grep "statically linked")
 
 # --------------------------------------------------------
 FROM alpine:3.16
 
-COPY --from=go-builder /code/build/globalfee /usr/bin/globalfee
+COPY --from=go-builder /code/build/globald /usr/bin/globald
 
 # Install dependencies used for Starship
 RUN apk add --no-cache curl make bash jq sed
@@ -41,4 +41,4 @@ WORKDIR /opt
 # rest server, tendermint p2p, tendermint rpc
 EXPOSE 1317 26656 26657
 
-CMD ["/usr/bin/globalfee", "version"]
+CMD ["/usr/bin/globald", "version"]

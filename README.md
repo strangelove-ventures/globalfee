@@ -1,1 +1,1 @@
-# SDK v50 GlobalFee
+# Cosmos-SDK x/GlobalFee

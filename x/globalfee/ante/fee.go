@@ -1,8 +1,6 @@
 package ante
 
 import (
-	"errors"
-
 	tmstrings "github.com/cometbft/cometbft/libs/strings"
 
 	errorsmod "cosmossdk.io/errors"
@@ -10,7 +8,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 
 	globalfeekeeper "github.com/strangelove-ventures/globalfee/x/globalfee/keeper"
 )
@@ -31,15 +28,13 @@ var _ sdk.AnteDecorator = FeeDecorator{}
 type FeeDecorator struct {
 	BypassMinFeeMsgTypes            []string
 	GlobalFeeKeeper                 globalfeekeeper.Keeper
-	StakingKeeper                   *stakingkeeper.Keeper
 	MaxTotalBypassMinFeeMsgGasUsage uint64
 }
 
-func NewFeeDecorator(bypassMsgTypes []string, gfk globalfeekeeper.Keeper, sk *stakingkeeper.Keeper, maxTotalBypassMinFeeMsgGasUsage uint64) FeeDecorator {
+func NewFeeDecorator(bypassMsgTypes []string, gfk globalfeekeeper.Keeper, maxTotalBypassMinFeeMsgGasUsage uint64) FeeDecorator {
 	return FeeDecorator{
 		BypassMinFeeMsgTypes:            bypassMsgTypes,
 		GlobalFeeKeeper:                 gfk,
-		StakingKeeper:                   sk,
 		MaxTotalBypassMinFeeMsgGasUsage: maxTotalBypassMinFeeMsgGasUsage,
 	}
 }
@@ -169,21 +164,7 @@ func (mfd FeeDecorator) GetGlobalFee(ctx sdk.Context, feeTx sdk.FeeTx) (sdk.Coin
 }
 
 func (mfd FeeDecorator) DefaultZeroGlobalFee(ctx sdk.Context) ([]sdk.DecCoin, error) {
-	bondDenom := mfd.getBondDenom(ctx)
-	if bondDenom == "" {
-		return nil, errors.New("empty staking bond denomination")
-	}
-
-	return []sdk.DecCoin{sdk.NewDecCoinFromDec(bondDenom, sdkmath.LegacyNewDec(0))}, nil
-}
-
-func (mfd FeeDecorator) getBondDenom(ctx sdk.Context) string {
-	bd, err := mfd.StakingKeeper.BondDenom(ctx)
-	if err != nil {
-		return ""
-	}
-
-	return bd
+	return []sdk.DecCoin{sdk.NewDecCoinFromDec("stake", sdkmath.LegacyNewDec(0))}, nil
 }
 
 // ContainsOnlyBypassMinFeeMsgs returns true if all the given msgs type are listed
